@@ -93,17 +93,22 @@ function newPanel(): Panel {
   return { id: nanoid(8), background: null, elements: [] };
 }
 
+// Stable initial panel ID. We must NOT generate a random ID inside useState's
+// lazy initializer because that runs once on the server (during SSR) and again
+// on the client (during hydration), producing different IDs → hydration
+// mismatch → React 19 bails out of hydration → no onClick handlers attached →
+// sidebar tile clicks silently do nothing in production. New panels added by
+// user interaction can use nanoid because they only run client-side.
+const INITIAL_PANEL_ID = "p0";
+
 export default function ComicCreator() {
   const router = useRouter();
-  const [panels, setPanels] = useState<Panel[]>(() => [newPanel()]);
+  const [panels, setPanels] = useState<Panel[]>(() => [
+    { id: INITIAL_PANEL_ID, background: null, elements: [] },
+  ]);
   const [selection, setSelection] = useState<Selection>(null);
   const [saving, setSaving] = useState(false);
-  const [activePanelId, setActivePanelId] = useState<string>(() => "");
-
-  // First-render: set the active panel id once panels are populated.
-  useEffect(() => {
-    if (!activePanelId && panels[0]) setActivePanelId(panels[0].id);
-  }, [activePanelId, panels]);
+  const [activePanelId, setActivePanelId] = useState<string>(INITIAL_PANEL_ID);
 
   // Stages registered by panel id, used at save time to export PNGs.
   const stagesRef = useRef<Map<string, Konva.Stage>>(new Map());
