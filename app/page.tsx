@@ -1,65 +1,88 @@
-import Image from "next/image";
+import Link from "next/link";
+import ComicCreator from "./create/ComicCreator";
+import RecentComics from "./components/RecentComics";
+import { CHARACTERS, BACKGROUNDS } from "@/lib/assets";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://writecomics.com";
+
+// Re-render at most every 30s so newly saved comics show up in the "recently
+// created" strip without forcing a full SSR on every request.
+export const revalidate = 30;
 
 export default function Home() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "WriteComics",
+    url: SITE_URL,
+    applicationCategory: "DesignApplication",
+    operatingSystem: "Any",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    description:
+      "Free in-browser comic creator. Drag characters, backgrounds, and speech bubbles to make your own comic strip.",
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Compact intro — keeps the SEO copy without burying the creator */}
+      <section className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+          <p className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold tracking-wide text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+            Free · No sign-up · Works in your browser
+          </p>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+            Make a comic strip — start below.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+          <p className="mt-1 max-w-prose text-sm text-zinc-600 sm:text-base dark:text-zinc-400">
+            Pick a scene, drop in characters, add speech bubbles. {CHARACTERS.length}{" "}
+            characters and {BACKGROUNDS.length} backgrounds, classroom-friendly.{" "}
+            <Link
+              href="/ten-tips"
+              className="font-semibold underline decoration-2 underline-offset-4 hover:no-underline"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Need ideas? Read 10 tips →
+            </Link>
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Recently created — horizontal strip across the top */}
+      <RecentComics limit={16} />
+
+      {/* The embedded creator — front and center */}
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+        <ComicCreator />
+      </section>
+
+      {/* SEO social proof + tips link, below the fold */}
+      <section className="bg-zinc-100 dark:bg-zinc-900">
+        <div className="mx-auto max-w-3xl px-4 py-12 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Recognized by educators
+          </p>
+          <blockquote className="mt-3 text-lg font-medium text-zinc-900 dark:text-zinc-100 sm:text-xl">
+            &ldquo;A great way for students to create comic strips —&nbsp;no
+            account required, just pick characters, add a background, and add
+            dialog.&rdquo;
+          </blockquote>
+          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+            — Featured as Tech Tool of the Month,{" "}
+            <a
+              href="https://teachersfirst.com/blog/2017/09/tech-tool-of-the-month-writecomics-com/"
+              className="underline hover:no-underline"
+              target="_blank"
+              rel="noopener"
+            >
+              TeachersFirst
+            </a>
+          </p>
         </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }

@@ -24,3 +24,25 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Tailwind 4 / Preflight removes the user-agent pointer cursor on <button>.
+   Restore pointer for interactive elements. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary,
+label[for] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Konva renders its canvas at internal pixel resolution (PANEL_WIDTH x PANEL_HEIGHT).
+   We CSS-scale it down to fit the responsive wrapper while preserving aspect ratio.
+   Hit testing still works because Konva uses getBoundingClientRect. */
+.comic-panel-wrap .konvajs-content,
+.comic-panel-wrap .konvajs-content canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
